@@ -12,8 +12,8 @@ resource "packet_device" "web1" {
   project_id       = "${var.project_id}"
 
   provisioner "file" {
-    source = "remote/setup.sh"
-    destination = "/tmp/setup.sh"
+    source = "remote/"
+    destination = "/tmp"
   }
   provisioner "remote-exec" {
     on_failure = "fail"

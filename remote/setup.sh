@@ -18,18 +18,14 @@ function terraform-install() {
 
 function vagrant-install() {
   [[ -f ${HOME}/bin/vagrant ]] && echo "`${HOME}/bin/vagrant version` already installed at ${HOME}/bin/vagrant" && return 0
-  LATEST_URL=$(curl -sL https://releases.hashicorp.com/vagrant/index.json | jq -r '.versions[].builds[].url' | egrep 'vagrant_[0-9]\.[0-9]{1,2}\.[0-9]{1,2}_linux.*amd64' | sort -V | tail -1)
-  curl ${LATEST_URL} > /tmp/vagrant.zip
-  mkdir -p ${HOME}/bin
-  (cd ${HOME}/bin && unzip /tmp/vagrant.zip)
-  if [[ -z $(grep 'export PATH=${HOME}/bin:${PATH}' ~/.bashrc) ]]; then
-  	echo 'export PATH=${HOME}/bin:${PATH}' >> ~/.bashrc
-  fi
+  LATEST_URL=$(curl -sL https://releases.hashicorp.com/vagrant/index.json | jq -r '.versions[].builds[].url' | egrep 'vagrant_[0-9]\.[0-9]{1,2}\.[0-9]{1,2}_x86_64.rpm' | sort -V | tail -1)
+  curl ${LATEST_URL} > /tmp/vagrant.rpm
+  (cd /tmp && yum -y localinstall vagrant.rpm)
 
-  echo "Installed: `${HOME}/bin/vagrant version`"
+  echo "Installed: `vagrant version`"
 }
 
-function vagrant-install() {
+function packer-install() {
   [[ -f ${HOME}/bin/packer ]] && echo "`${HOME}/bin/packer version` already installed at ${HOME}/bin/packer" && return 0
   LATEST_URL=$(curl -sL https://releases.hashicorp.com/packer/index.json | jq -r '.versions[].builds[].url' | egrep 'packer_[0-9]\.[0-9]{1,2}\.[0-9]{1,2}_linux.*amd64' | sort -V | tail -1)
   curl ${LATEST_URL} > /tmp/packer.zip
@@ -48,15 +44,18 @@ function source_reload() {
 
 # Base Yum Operations
 yum update -y
-declare -a yumlist=(binutils gcc make patch libgomp glibc-headers glibc-devel kernel-headers kernel-devel dkms jq mlocate unzip)
-yum install -y ${yumlist[@]}
+yum groupinstall -y "Development Tools"
+yum -y install epel-release
+declare -a yumlist1=(gcc dkms make qt libgomp patch)
+yum install -y ${yumlist1[@]}
+declare -a yumlist2=(binutils glibc-headers glibc-devel font-forge jq mlocate unzip)
+yum install -y ${yumlist2[@]}
 updatedb
 
 # Install VirtualBox
-cd /etc/yum.repos.d/
-wget http://download.virtualbox.org/virtualbox/rpm/rhel/virtualbox.repo
-rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-yum install VirtualBox-6.0 -y
+wget http://download.virtualbox.org/virtualbox/rpm/rhel/virtualbox.repo -P /etc/yum.repos.d/
+yum -y install VirtualBox-6.0
+
 
 #Install vagrant
 vagrant-install
@@ -66,3 +65,7 @@ packer-install
 terraform-install
 # Reload PATH
 source_reload
+
+# Install Nomad
+mkdir ${HOME}/nomad && cp /tmp/Vagrantfile ${HOME}/nomad && cd ${HOME}/nomad
+vagrant up
