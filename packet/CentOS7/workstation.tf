@@ -3,7 +3,7 @@ provider "packet" {
 }
 
 resource "packet_device" "web1" {
-  hostname         = "web1"
+  hostname         = "workstation1"
   plan             = "t1.small.x86"
   facilities         = ["iad1", "atl1", "ewr1"]
   operating_system = "centos_7"
