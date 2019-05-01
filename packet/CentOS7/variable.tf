@@ -1,4 +1,5 @@
 # This is your Packet API Auth token
+
 variable "auth_token" {}
 
 # This is the string of numbers when you log into Packet and get to your Project Space
