@@ -42,6 +42,11 @@ function source_reload() {
   source ~/.bashrc
 }
 
+# Install VirtualBox
+wget http://download.virtualbox.org/virtualbox/rpm/rhel/virtualbox.repo -P /etc/yum.repos.d/
+yum -y install VirtualBox-6.0
+
+
 #Install vagrant
 vagrant-install
 # Install Packer
@@ -50,3 +55,7 @@ packer-install
 terraform-install
 # Reload PATH
 source_reload
+
+# Install Nomad
+mkdir ${HOME}/nomad && cp /tmp/Vagrantfile ${HOME}/nomad && cd ${HOME}/nomad
+vagrant up
